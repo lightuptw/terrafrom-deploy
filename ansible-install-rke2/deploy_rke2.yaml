@@ -1,0 +1,23 @@
+# - name: Deploy RKE2
+#   # hosts: k8s_cluster
+#   hosts: rke21
+#   become: yes
+#   # vars:
+#     # rke2_airgap_mode: true
+#     # rke2_airgap_implementation: download
+#   #   rke2_ha_mode: true
+#   #   rke2_api_ip: 192.168.100.6
+#   #   rke2_download_kubeconf: true
+#   roles:
+#     - role: lablabs.rke2
+# - name: Deploy RKE2
+#   hosts: k8s_cluster
+#   become: yes
+#   roles:
+#     - role: lablabs.rke2
+- name: Deploy RKE2
+  hosts: k8s_cluster
+  become: yes
+  roles:
+    - role: lablabs.rke2
+

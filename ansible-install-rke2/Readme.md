@@ -1,0 +1,1 @@
+https://www.pivert.org/rke2-cluster-on-ubuntu-22-04-in-minutes-ansible-galaxy-and-manual-options/
