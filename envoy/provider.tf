@@ -3,6 +3,10 @@ terraform {
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
+
+    kubectl = {
+      source = "gavinbunney/kubectl"
+    }
   }
 }
 
@@ -20,5 +24,9 @@ provider "helm" {
 }
 
 provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
+
+provider "kubectl" {
   config_path = "~/.kube/config"
 }

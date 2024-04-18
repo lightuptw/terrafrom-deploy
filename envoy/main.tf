@@ -9,8 +9,8 @@ resource "helm_release" "eg" {
 #   ]
 }
 
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [kubernetes_namespace.envoy-gateway-system]
+# resource "time_sleep" "wait_30_seconds" {
+#   depends_on = [kubernetes_namespace.envoy-gateway-system]
 
-  destroy_duration = "30s"
-}
+#   destroy_duration = "30s"
+# }
