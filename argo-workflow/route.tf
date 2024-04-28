@@ -1,11 +1,10 @@
 resource "kubectl_manifest" "HTTPRoute" {
   yaml_body  = <<-EOF
-
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: argo-workflows-server
-  namespace: argo
+  name: argowfr
+  namespace: default
 spec:
   parentRefs:
     - name: eg
@@ -25,6 +24,26 @@ spec:
             value: /
     EOF
 }
+
+resource "kubectl_manifest" "ReferenceGrant" {
+  yaml_body  = <<-EOF
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: argorg
+  namespace: argo
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    namespace: default
+  to:
+  - group: ""
+    kind: Service
+    EOF
+}
+
+
 
 # resource "kubectl_manifest" "HTTPRoute" {
 #   yaml_body  = <<-EOF
