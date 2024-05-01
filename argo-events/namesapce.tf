@@ -4,5 +4,6 @@ resource "kubernetes_namespace" "argo-events-ns" {
     #   name = "argo-events"
     # }
     name = "argo-events"
+
   }
 }
