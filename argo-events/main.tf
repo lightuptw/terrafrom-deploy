@@ -1,30 +1,48 @@
 resource "kubectl_manifest" "eventBus" {
   override_namespace = "argo-events"
-  yaml_body = file("eventBus.yaml")
+  yaml_body = file("k8s-resource/eventBus.yaml")
 }
 
 resource "kubectl_manifest" "eventSource" {
   override_namespace = "argo-events"
   
-  yaml_body = file("eventStouce.yaml")
+  yaml_body = file("k8s-resource/eventStouce.yaml")
 }
 
 resource "kubectl_manifest" "sensor" {
   override_namespace = "argo-events"
   
-  yaml_body = file("sensor.yaml")
+  yaml_body = file("sensor/sensor.yaml")
 }
 
-resource "kubectl_manifest" "workflow-rbac" {
+resource "kubectl_manifest" "workflow-rbac-role" {
   override_namespace = "argo-events"
 
-  yaml_body = file("workflow-rbac.yaml")
+  yaml_body = file("k8s-resource/workflow-rbac-role.yaml")
 }
 
-resource "kubectl_manifest" "sensor-rbac" {
+resource "kubectl_manifest" "workflow-rbac-roleBinding" {
   override_namespace = "argo-events"
 
-  yaml_body = file("sensor-rbac.yaml")
+  yaml_body = file("k8s-resource/workflow-rbac-roleBinding.yaml")
+}
+// sensor
+resource "kubectl_manifest" "sensor-rbac-sa" {
+  override_namespace = "argo-events"
+
+  yaml_body = file("sensor/sensor-rbac-sa.yaml")
+}
+
+resource "kubectl_manifest" "sensor-rbac-role" {
+  override_namespace = "argo-events"
+
+  yaml_body = file("sensor/sensor-rbac-role.yaml")
+}
+
+resource "kubectl_manifest" "sensor-rbac-roleBinding" {
+  override_namespace = "argo-events"
+
+  yaml_body = file("sensor/sensor-rbac-roleBinding.yaml")
 }
 
 variable "github-access-token" {
