@@ -225,7 +225,7 @@ server:
     enabled: true
     ## @param server.auth.mode Set authentication mode. Either `server`, `client` or `sso`.
     ##
-    mode: client
+    mode: server
     ## SSO configuration when SSO is specified as a server auth mode.
     ## All the values are required. SSO is activated by adding --auth-mode=sso to the server command line.
     ## @param server.auth.sso.enabled Enable SSO configuration for the server auth mode
