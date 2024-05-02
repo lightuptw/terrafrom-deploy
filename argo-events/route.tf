@@ -1,28 +1,20 @@
+locals{
+  route = yamldecode(file("eventsource-route.yaml"))
+}
+
+variable hostname {
+  type = string
+}
+
 resource "kubectl_manifest" "HTTPRoute" {
-  yaml_body  = <<-EOF
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: argoevents-route
-  namespace: default
-spec:
-  parentRefs:
-    - name: eg
-  hostnames:
-    - "argo-event.s.net-chain.xyz"
-  rules:
-    - backendRefs:
-        - group: ""
-          kind: Service
-          namespace: argo-events
-          name: github-eventsource-svc
-          port: 12000
-          weight: 1
-      matches:
-        - path:
-            type: PathPrefix
-            value: /
-    EOF
+  yaml_body  = yamlencode({
+    apiVersion = lookup(local.route, "apiVersion")
+    kind = lookup(local.route, "kind")
+    metadata = lookup(local.route, "metadata")
+    spec = merge(lookup(local.route, "spec"), {
+      hostnames = ["${var.hostname}"]
+    }) 
+  })
 }
 
 resource "kubectl_manifest" "ReferenceGrant" {

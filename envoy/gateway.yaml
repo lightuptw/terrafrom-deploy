@@ -21,7 +21,7 @@ spec:
         - kind: TCPRoute  
     - name: https
       protocol: HTTPS
-      hostname: "*.s.net-chain.xyz"
+      hostname: "*.hq.lightup.tw"
       port: 443
       tls:
         mode: Terminate
