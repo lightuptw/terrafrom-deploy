@@ -1,4 +1,4 @@
 [masters]
-114.35.57.102 ansible_ssh_user=jack ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+10.70.79.138 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
 [k8s_cluster:children]
 masters
