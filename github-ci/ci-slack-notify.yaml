@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  dependencies:
+    - name: test-dep
+      eventSourceName: webhook
+      eventName: example
+  triggers:
+    - parameters:
+        - src:
+            dependencyName: test-dep
+            dataKey: body.channel
+          dest: slack.channel
+        - src:
+            dependencyName: test-dep
+            dataKey: body.message
+          dest: slack.message
+      template:
+        name: slack-trigger
+        slack:
+          slackToken:
+            key: token
+            name: slack-secret
+          channel: general
+          message: hello world

@@ -1,0 +1,177 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ci-
+spec:
+  # serviceAccountName: argo-workflows-server
+  # entrypoint is the name of the template used as the starting point of the workflow
+  entrypoint: ci
+  onExit: slack-exit
+  # volumes:
+  # - name: workdir
+  #   persistentVolumeClaim:
+  #     claimName: pv1
+  # the 'ci-example' template accepts a parameter 'revision', with a default of 'cfe12d6'.
+  # this can be overridden via argo CLI (e.g. `argo submit ci.yaml -p revision=0dea2d0`)
+  arguments:
+    parameters:
+    - name: revision
+      value: cfe12d6
+  volumes: 
+  - name: cache
+    persistentVolumeClaim:
+      claimName: pv-cache
+  - name: kaniko-secret
+    secret:
+      secretName: kaniko-secret     
+  - name: slack-secret
+    secret:
+      secretName: slack-secret           
+ 
+  # a temporary volume, named workdir, will be used as a working directory
+  # for this workflow. This volume is passed around from step to step.
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      storageClassName: local-path
+      # volumeName: ci-pv
+      accessModes: 
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+  templates:
+  - name: ci
+    inputs:
+      parameters:
+      - name: revision
+    steps:
+    - - name: build
+        template: build-node-service
+        arguments:
+          parameters:
+          - name: revision
+            value: "{{inputs.parameters.revision}}"
+    # - - name: build-docker
+    #     template: build-docker            
+
+  - name: build-node-service
+    inputs:
+      parameters:
+      - name: revision
+      artifacts:
+      - name: code
+        path: /node/git
+        git:
+          revision: main
+          repo: git@github.com:lightuptw/messenger-services.git
+          # revision: "{{inputs.parameters.revision}}"
+          branch: main
+          singleBranch: true
+          sshPrivateKeySecret:
+            name: github-creds
+            key: sshprivatekey
+          insecureIgnoreHostKey: true   
+    container:
+      image: node:20-bullseye
+      command: [sh, -c]
+      args: ["
+          cd /node/git &&
+          npm install -g pnpm &&
+          pnpm config set store-dir /cache/.pnpm-store && 
+          cd ./apps/mail &&
+          pnpm i &&
+          pnpm build
+          "]      
+      # args: ["
+      #     cd /node/git "]
+      volumeMounts:
+      - name: workdir
+        mountPath: /node
+      - name: cache
+        mountPath: /cache
+      resources:
+        # limits:
+        #   memory: 5Gi
+        requests:
+          memory: 5Gi    
+          cpu: 4
+  - name: build-docker
+    container:
+      #argo is gonna ask for a command - the debug version allows us to exec this way i think
+      image: gcr.io/kaniko-project/executor:v1.9.0-debug
+      imagePullPolicy: Always
+      command: ["/kaniko/executor"]
+      args:
+        [
+          "--dockerfile=/node/git/apps/mail/deploy/node-pod.Dockerfile",
+          "--context=/node/git/apps/mail",
+          "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/nesttest:tag2",
+          "--cache=false",
+        ]
+      env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/kaniko-secret/kaniko-secret.json        
+      volumeMounts:
+        - name: workdir
+          mountPath: /node
+        - name: kaniko-secret
+          readOnly: true
+          mountPath: "/secret/kaniko-secret"          
+      resources:
+        limits:
+          cpu: 4
+          memory: 5Gi  
+  - name: slack-exit
+    container: 
+      args: 
+      # - $(WEBHOOK_URL)
+      - 'https://slack.com/api/chat.postMessage'
+      - '-H'
+      - 'Authorization: Bearer $(TOKEN)'
+      - '-H'
+      - 'Content-Type: application/json'
+      - '--data'
+      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.text}} {{workflow.status}}"}'
+      command:
+      - curl
+      env:
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: slack-secret
+      image: curlimages/curl:7.84.0
+      name: curl
+      resources:
+        limits:
+          memory: 100Mi
+        requests:
+          memory: 50Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsGroup: 1000
+        runAsUser: 1000          
+    inputs:
+      parameters:
+        - name: channel
+          value: ci_cd
+        - name: text
+          value: "image build status: "
+               
+  # - name: run-hello
+  #   inputs:
+  #     parameters:
+  #     - name: os-image
+  #   container:
+  #     image: "{{inputs.parameters.os-image}}"
+  #     command: [sh, -c]
+  #     args: ["
+  #       uname -a ;
+  #       cat /etc/os-release ;
+  #       /go/src/github.com/golang/example/hello/hello
+  #       "]
+  #     volumeMounts:
+  #     - name: workdir
+  #       mountPath: /go

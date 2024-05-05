@@ -1,5 +1,5 @@
 locals{
-  route = yamldecode(file("eventsource-route.yaml"))
+  route = yamldecode(file("route.yaml"))
 }
 
 variable hostname {
@@ -16,33 +16,6 @@ resource "kubectl_manifest" "HTTPRoute" {
     }) 
   })
 }
-
-# resource "kubectl_manifest" "HTTPRoute" {
-#   yaml_body  = <<-EOF
-# apiVersion: gateway.networking.k8s.io/v1
-# kind: HTTPRoute
-# metadata:
-#   name: argowfr
-#   namespace: default
-# spec:
-#   parentRefs:
-#     - name: eg
-#   hostnames:
-#     - "argo-workflows.hq.lightup.tw"
-#   rules:
-#     - backendRefs:
-#         - group: ""
-#           kind: Service
-#           namespace: argo
-#           name: argo-workflows-server
-#           port: 80
-#           weight: 1
-#       matches:
-#         - path:
-#             type: PathPrefix
-#             value: /
-#     EOF
-# }
 
 resource "kubectl_manifest" "ReferenceGrant" {
   yaml_body  = <<-EOF
@@ -61,27 +34,6 @@ spec:
     kind: Service
     EOF
 }
-
-
-
-# resource "kubectl_manifest" "HTTPRoute" {
-#   yaml_body  = <<-EOF
-
-# kind: ReferenceGrant
-# metadata:
-#   name: bar
-#   namespace: bar
-# spec:
-#   from:
-#   - group: gateway.networking.k8s.io
-#     kind: HTTPRoute
-#     namespace: foo
-#   to:
-#   - group: ""
-#     kind: Service
-
-#     EOF
-# }
 
 # resource "kubectl_manifest" "TCPRoute" {
 #   yaml_body  = <<-EOF

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: github-
+spec:
+  entrypoint: whalesay
+  arguments:
+    parameters:
+      - name: name
+  templates:
+    - name: whalesay
+      inputs:
+        parameters:
+          - name: name
+      container:
+        image: docker/whalesay:latest
+        command: [cowsay]
+        args: ["{{inputs.parameters.name}}"]

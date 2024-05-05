@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: my-workflow
+  labels:
+    app: my-workflow
+spec:
+  entrypoint: slack-exit
+  onExit: exit
+  volumes:   
+  - name: slack-secret-vol
+    secret:
+      secretName: slack-secret    
+  templates:
+  - name: slack-exit
+    container: 
+      args: 
+      # - $(WEBHOOK_URL)
+      - 'https://slack.com/api/chat.postMessage'
+      - '-H'
+      - 'Authorization: Bearer $(TOKEN)'
+      - '-H'
+      - 'Content-Type: application/json'
+      - '--data'
+      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.text}}"}'
+      command:
+      - curl
+      env:
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: slack-secret
+      image: curlimages/curl:7.84.0
+      name: curl
+      resources:
+        limits:
+          memory: 100Mi
+        requests:
+          memory: 50Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsGroup: 1000
+        runAsUser: 1000          
+    inputs:
+      parameters:
+        - name: channel
+          value: ci_cd
+        - name: text
+          value: inputtest
+  - name: exit
+    http: 
+      url: https://slack.com/api/chat.postMessage
+      method: "POST"
+      headers:
+        - name: "Content-type"
+          value: "application/json"      
+      body: "{\"channel\":\"ci_cd\",\"text\":\"exit\"}" # Change request body          
+      
+
+      
