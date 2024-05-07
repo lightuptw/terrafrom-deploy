@@ -63,7 +63,7 @@ spec:
 
       # type of the connection between event-source and Github.
       # You should set it to false to avoid man-in-the-middle and other attacks.
-      insecure: true
+      insecure: flase
       # Determines if notifications are sent when the webhook is triggered
       active: true
       # The media type used to serialize the payloads

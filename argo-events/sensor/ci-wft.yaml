@@ -1,0 +1,139 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci
+spec:
+  serviceAccountName: argo
+  templates:
+  - name: build-node-service
+    inputs:
+      parameters:
+      - name: revision
+      artifacts:
+      - name: code
+        path: /node/git
+        git:
+          revision: main
+          repo: git@github.com:lightuptw/messenger-services.git
+          # revision: "{{inputs.parameters.revision}}"
+          branch: main
+          singleBranch: true
+          sshPrivateKeySecret:
+            name: github-creds
+            key: sshprivatekey
+          insecureIgnoreHostKey: true   
+    container:
+      image: node:20-bullseye
+      command: [sh, -c]
+      args: ["
+          cd /node/git &&
+          npm install -g pnpm &&
+          pnpm config set store-dir /cache/.pnpm-store && 
+          cd ./apps/mail &&
+          pnpm i &&
+          pnpm build
+          "]      
+      # args: ["
+      #     cd /node/git "]
+      volumeMounts:
+      - name: workdir
+        mountPath: /node
+      - name: cache
+        mountPath: /cache
+      resources:
+        # limits:
+        #   memory: 5Gi
+        requests:
+          memory: 5Gi    
+          cpu: 4
+  - name: build-image
+    inputs:
+      artifacts:
+      - name: code
+        path: /node/git
+        git:
+          revision: dev-mail
+          repo: git@github.com:lightuptw/messenger-services.git
+          # revision: "{{inputs.parameters.revision}}"
+          branch: dev-mail
+          singleBranch: true
+          sshPrivateKeySecret:
+            name: github-creds
+            key: sshprivatekey
+          insecureIgnoreHostKey: true     
+      parameters:
+        - name: env
+        - name: app
+        - name: updated_at
+    container:
+      #argo is gonna ask for a command - the debug version allows us to exec this way i think
+      image: gcr.io/kaniko-project/executor:v1.22.0-debug
+      imagePullPolicy: Always
+      command: ["/kaniko/executor"]
+      args:
+        [
+          # "--build-arg=TARGET_APP='mail'",
+          "--build-arg=TARGET_APP='{{=inputs.parameters.app}}'",
+          "--dockerfile=/node/git/ci/dev.Dockerfile",
+          "--context=/node/git",
+          "--cache-run-layers=true",
+          # "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/mail:123",
+          "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/{{inputs.parameters.app}}:{{inputs.parameters.env}}-{{=sprig.replace(':', '-',inputs.parameters.updated_at)}}",
+          "--cache=true",
+          "--cache-dir=/cache",
+          "--snapshotMode=time",
+          "--target=build",
+          "--ignore-path=/node/git"
+        ]
+      env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/kaniko-secret/kaniko-secret.json        
+      volumeMounts:
+        - name: workdir
+          mountPath: /node
+        - name: kaniko-secret
+          readOnly: true
+          mountPath: "/secret/kaniko-secret"    
+        - name: cache
+          mountPath: /cache                
+      resources:
+        requests:
+          cpu: 4
+          memory: 5Gi  
+  - name: slack-exit
+    inputs:
+      parameters:
+        - name: name
+        - name: env
+        - name: app
+        - name: channel
+          value: ci_cd        
+    container: 
+      args: 
+      # - $(WEBHOOK_URL)
+      - 'https://slack.com/api/chat.postMessage'
+      - '-H'
+      - 'Authorization: Bearer $(TOKEN)'
+      - '-H'
+      - 'Content-Type: application/json'
+      - '--data'
+      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.name}} {{inputs.parameters.app}} {{workflow.status}}"}'
+      command:
+      - curl
+      env:
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: slack-secret
+      image: curlimages/curl:7.84.0
+      name: curl
+      resources:
+        limits:
+          memory: 100Mi
+        requests:
+          memory: 50Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsGroup: 1000
+        runAsUser: 1000     

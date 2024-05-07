@@ -71,6 +71,14 @@ resource "kubectl_manifest" "sensor" {
 
 }
 
+resource "kubectl_manifest" "ci-wft" {
+  override_namespace = "argo-events"
+  
+  yaml_body = file("sensor/ci-wft.yaml")
+  depends_on = [helm_release.argo-events-helm]
+}
+
+
 resource "kubectl_manifest" "workflow-rbac-role" {
   override_namespace = "argo-events"
 
