@@ -41,6 +41,8 @@ spec:
               metadata:
                 generateName: github-
               spec:
+                entrypoint: docker-build
+                onExit: exit
                 volumes:
                   - name: cache
                     persistentVolumeClaim:
@@ -54,8 +56,6 @@ spec:
                   - name: github-access
                     secret:
                       secretName: github-access                      
-
-                      
                 volumeClaimTemplates:
                 - metadata:
                     name: workdir
@@ -67,71 +67,145 @@ spec:
                     resources:
                       requests:
                         storage: 4Gi                                        
-                entrypoint: start-step
-                      
                 arguments:
                   parameters:
                     - name: name
                     - name: ref
                     - name: updated_at
                 templates:
-                  - name: start-step
-                    steps: 
-                    - - name: get-cache-image
-                        arguments:
-                          parameters:
-                            - name: name
-                              value: '{{workflow.parameters.name}}'                          
-                            - name: env
-                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
-                            - name: app
-                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
-                            - name: updated_at
-                              value: '{{workflow.parameters.updated_at}}'
-                        templateRef: 
-                          name: ci
-                          template: get-cache-image      
-                    # - - name: build-store-image 
-                    #     arguments:
-                    #       parameters:
-                    #         - name: name
-                    #           value: '{{workflow.parameters.name}}'                          
-                    #         - name: env
-                    #           value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
-                    #         - name: app
-                    #           value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
-                    #         - name: updated_at
-                    #           value: '{{workflow.parameters.updated_at}}'
-                    #         - name: updated_image_targetat
-                    #           value: store                            
-                    #     templateRef: 
-                    #       name: ci
-                    #       template: build-image                                            
-                    - - name: build-prod-pkg-image 
-                        arguments:
-                          parameters:
-                            - name: name
-                              value: '{{workflow.parameters.name}}'                          
-                            - name: env
-                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
-                            - name: app
-                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
-                            - name: updated_at
-                              value: '{{workflow.parameters.updated_at}}'
-                            # - name: image_target
-                            #   value: cache-store                             
-                            # - name: image_target
-                            #   value: cache-prod-pkg
-                            # - name: image_name
-                            #   value: cache-prod-pkg
-                            # app
-                            - name: image_target
-                              value: app                
-                            - name: image_name
-                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                      
-                        templateRef: 
-                          name: ci
-                          template: build-image                         
+                  - name: exit
+                    inputs:
+                      parameters:
+                        - name: name
+                        - name: env
+                          value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                        - name: app
+                          value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'            
+                        - name: channel
+                          value: ci_cd        
+                    container: 
+                      args: 
+                      # - $(WEBHOOK_URL)
+                      - 'https://slack.com/api/chat.postMessage'
+                      - '-H'
+                      - 'Authorization: Bearer $(TOKEN)'
+                      - '-H'
+                      - 'Content-Type: application/json'
+                      - '--data'
+                      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.name}} {{inputs.parameters.app}} {{workflow.status}}"}'
+                      command:
+                      - curl
+                      env:
+                        - name: TOKEN
+                          valueFrom:
+                            secretKeyRef:
+                              key: token
+                              name: slack-secret
+                      image: curlimages/curl:7.84.0
+                      name: curl
+                      resources:
+                        limits:
+                          memory: 100Mi
+                        requests:
+                          memory: 50Mi
+                      securityContext:
+                        allowPrivilegeEscalation: false
+                        runAsGroup: 1000
+                        runAsUser: 1000      
+                    arguments:
+                      parameters:
+                        - name: name
+                          value: '{{workflow.parameters.name}}'                          
+                        - name: env
+                          value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                        - name: app
+                          value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                        - name: updated_at
+                          value: '{{workflow.parameters.updated_at}}'                                         
+                  - name: docker-build
+                    dag:
+                      tasks:
+                        - name: get-cache-image
+                          arguments:
+                            parameters:
+                              - name: name
+                                value: '{{workflow.parameters.name}}'                          
+                              - name: env
+                                value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                              - name: app
+                                value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                              - name: updated_at
+                                value: '{{workflow.parameters.updated_at}}'
+                          templateRef: 
+                            name: ci
+                            template: get-cache-image   
+                        - name: build-image 
+                          dependencies: [get-cache-image]
+                          arguments:
+                            parameters:
+                              - name: name
+                                value: '{{workflow.parameters.name}}'                          
+                              - name: env
+                                value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                              - name: app
+                                value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                              - name: updated_at
+                                value: '{{workflow.parameters.updated_at}}'
+                              # - name: image_target
+                              #   value: cache-store                             
+                              # - name: image_target
+                              #   value: cache-prod-pkg
+                              # - name: image_name
+                              #   value: cache-prod-pkg
+                              # app
+                              - name: image_target
+                                value: app                
+                              - name: image_name
+                                value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                      
+                          templateRef: 
+                            name: ci
+                            template: build-image                                                   
+                  # - name: docker-build
+                  #   steps: 
+                  #   - - name: get-cache-image
+                  #       arguments:
+                  #         parameters:
+                  #           - name: name
+                  #             value: '{{workflow.parameters.name}}'                          
+                  #           - name: env
+                  #             value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                  #           - name: app
+                  #             value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                  #           - name: updated_at
+                  #             value: '{{workflow.parameters.updated_at}}'
+                  #       templateRef: 
+                  #         name: ci
+                  #         template: get-cache-image                                               
+                  #   - - name: build-prod-pkg-image 
+                  #       arguments:
+                  #         parameters:
+                  #           - name: name
+                  #             value: '{{workflow.parameters.name}}'                          
+                  #           - name: env
+                  #             value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                  #           - name: app
+                  #             value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                  #           - name: updated_at
+                  #             value: '{{workflow.parameters.updated_at}}'
+                  #           # - name: image_target
+                  #           #   value: cache-store                             
+                  #           # - name: image_target
+                  #           #   value: cache-prod-pkg
+                  #           # - name: image_name
+                  #           #   value: cache-prod-pkg
+                  #           # app
+                  #           - name: image_target
+                  #             value: app                
+                  #           - name: image_name
+                  #             value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                      
+                  #       templateRef: 
+                  #         name: ci
+                  #         template: build-image                         
           parameters:
             - src:
                 dependencyName: test-dep
