@@ -92,7 +92,7 @@ spec:
                       - '-H'
                       - 'Content-Type: application/json'
                       - '--data'
-                      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.name}} {{inputs.parameters.app}} {{workflow.status}}"}'
+                      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.name}} {{inputs.parameters.app}} ci end, result: {{workflow.status}}"}'
                       command:
                       - curl
                       env:
@@ -121,10 +121,29 @@ spec:
                         - name: app
                           value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
                         - name: updated_at
-                          value: '{{workflow.parameters.updated_at}}'                                         
+                          value: '{{workflow.parameters.updated_at}}'      
+
+
+                      parameters:
+                        - name: name
+                          value: '{{workflow.parameters.name}}'                          
+                        - name: env
+                          value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                        - name: app
+                          value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                        - name: updated_at
+                          value: '{{workflow.parameters.updated_at}}'                                                               
                   - name: docker-build
                     dag:
                       tasks:
+                        - name: send-slack
+                          templateRef: 
+                            name: ci
+                            template: slack-send                            
+                          arguments:
+                            parameters:
+                              - name: msg
+                                value: 'ci start: {{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}} '                                                        
                         - name: get-cache-image
                           arguments:
                             parameters:

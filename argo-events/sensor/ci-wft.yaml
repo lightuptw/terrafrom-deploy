@@ -136,12 +136,10 @@ spec:
         requests:
           cpu: 2
           memory: 4Gi  
-  - name: slack-exit
+  - name: slack-send
     inputs:
       parameters:
-        - name: name
-        - name: env
-        - name: app
+        - name: msg
         - name: channel
           value: ci_cd        
     container: 
@@ -153,7 +151,7 @@ spec:
       - '-H'
       - 'Content-Type: application/json'
       - '--data'
-      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.name}} {{inputs.parameters.app}} {{workflow.status}}"}'
+      - '{"channel": "{{inputs.parameters.channel}}", "text": "{{inputs.parameters.msg}}"}'
       command:
       - curl
       env:
