@@ -127,7 +127,7 @@ variable "github-access-secret" {
   type = string
 }
 
-resource "kubectl_manifest" "cloudflare-api-key-secret" {
+resource "kubectl_manifest" "github-access-secret" {
   override_namespace = "argo-events"
 
     yaml_body = yamlencode({

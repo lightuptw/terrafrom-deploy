@@ -6,7 +6,7 @@ resource "kubernetes_persistent_volume" "pv" {
   }
   spec {
     capacity = {
-      storage = "2Gi"
+      storage = "10Gi"
     }
     access_modes = ["ReadWriteOnce"]
     persistent_volume_source {
@@ -44,7 +44,7 @@ resource "kubernetes_persistent_volume_claim" "pv-cache" {
 
     resources {
       requests = {
-        storage = "1Gi"
+        storage = "10Gi"
       }
     }
     volume_name = "${kubernetes_persistent_volume.pv.metadata.0.name}"

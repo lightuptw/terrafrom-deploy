@@ -46,25 +46,47 @@ spec:
         requests:
           memory: 5Gi    
           cpu: 4
+  - name: get-cache-image
+    inputs:   
+      parameters:
+        - name: env
+        - name: app
+        - name: updated_at      
+        - name: image
+          value: asia-east1-docker.pkg.dev/lightup-tw/lightup/microservices-ci-cache
+    container:
+      #argo is gonna ask for a command - the debug version allows us to exec this way i think
+      image: gcr.io/kaniko-project/warmer:latest
+      imagePullPolicy: Always
+      # command: ["/kaniko/executor"]
+      args: [
+        "--cache-dir=/cache",
+        "--image=node:20-alpine3.18",
+        # "--image={{inputs.parameters.image}}:187beb87b2ee51df66fe1d26f672a47ce008dd0b06506b6f874efc41d1db30af",
+        "--image=asia-east1-docker.pkg.dev/lightup-tw/lightup/microservices/cache-store:latest",
+        # "--image=asia-east1-docker.pkg.dev/lightup-tw/lightup/microservices/cache-prod-pkg:latest",
+      ]
+      env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secret/kaniko-secret/kaniko-secret.json        
+      volumeMounts:
+        - name: cache
+          mountPath: /cache 
+        - name: kaniko-secret
+          readOnly: true
+          mountPath: "/secret/kaniko-secret"                  
+      resources:
+        requests:
+          cpu: 2
+          memory: 4Gi            
   - name: build-image
     inputs:
-      artifacts:
-      - name: code
-        path: /node/git
-        git:
-          revision: dev-mail
-          repo: git@github.com:lightuptw/messenger-services.git
-          # revision: "{{inputs.parameters.revision}}"
-          branch: dev-mail
-          singleBranch: true
-          sshPrivateKeySecret:
-            name: github-creds
-            key: sshprivatekey
-          insecureIgnoreHostKey: true     
       parameters:
         - name: env
         - name: app
         - name: updated_at
+        - name: image_target
+        - name: image_name
     container:
       #argo is gonna ask for a command - the debug version allows us to exec this way i think
       image: gcr.io/kaniko-project/executor:v1.22.0-debug
@@ -72,34 +94,48 @@ spec:
       command: ["/kaniko/executor"]
       args:
         [
-          # "--build-arg=TARGET_APP='mail'",
-          "--build-arg=TARGET_APP='{{=inputs.parameters.app}}'",
           "--dockerfile=/node/git/ci/dev.Dockerfile",
-          "--context=/node/git",
+          "--context=git://$(GITHUB_TOKEN)@github.com/lightuptw/messenger-services.git#refs/heads/dev-mail",          
+          "--dockerfile=/kaniko/buildcontext/ci/dev.Dockerfile",
           "--cache-run-layers=true",
+          "--cache-copy-layers=false",
           # "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/mail:123",
-          "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/{{inputs.parameters.app}}:{{inputs.parameters.env}}-{{=sprig.replace(':', '-',inputs.parameters.updated_at)}}",
+          "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/microservices/{{=inputs.parameters.image_name}}",
+          # "--destination=asia-east1-docker.pkg.dev/lightup-tw/lightup/{{inputs.parameters.app}}:{{inputs.parameters.env}}-{{=sprig.replace(':', '-',inputs.parameters.updated_at)}}",
+
+          "--cache-repo=asia-east1-docker.pkg.dev/lightup-tw/lightup/microservices-ci-cache",
           "--cache=true",
+          # "--cache=false",
           "--cache-dir=/cache",
-          "--snapshotMode=time",
-          "--target=build",
-          "--ignore-path=/node/git"
+          # "--snapshot-mode=redo",
+          "--snapshot-mode=time",
+          "--target={{=inputs.parameters.image_target}}",
+          "--build-arg=targetApp={{=inputs.parameters.app}}",
+          # "--no-push"
+          "--single-snapshot",
+          "--use-new-run",
+          "--skip-unused-stages",
         ]
       env:
         - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: /secret/kaniko-secret/kaniko-secret.json        
+          value: /secret/kaniko-secret/kaniko-secret.json  
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: github-access
       volumeMounts:
+        # - name: workdir
+        #   mountPath: /cache
         - name: workdir
-          mountPath: /node
+          mountPath: /cache          
         - name: kaniko-secret
           readOnly: true
-          mountPath: "/secret/kaniko-secret"    
-        - name: cache
-          mountPath: /cache                
+          mountPath: "/secret/kaniko-secret"                             
       resources:
         requests:
-          cpu: 4
-          memory: 5Gi  
+          cpu: 2
+          memory: 4Gi  
   - name: slack-exit
     inputs:
       parameters:

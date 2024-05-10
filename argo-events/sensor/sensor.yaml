@@ -17,6 +17,14 @@ spec:
             type: string
             value:
               - push
+          - path: body.ref
+            type: string
+            comparator: "="
+            value:
+              # - refs/heads/dev-mail
+              - refs/heads/dev
+              # - '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'     
+            template: '{{index (splitList "-" .Input) 0}}'      
           # - path: body.repository.full_name
           #   type: string
           #   value:
@@ -42,7 +50,12 @@ spec:
                       secretName: kaniko-secret     
                   - name: slack-secret
                     secret:
-                      secretName: slack-secret  
+                      secretName: slack-secret 
+                  - name: github-access
+                    secret:
+                      secretName: github-access                      
+
+                      
                 volumeClaimTemplates:
                 - metadata:
                     name: workdir
@@ -53,7 +66,7 @@ spec:
                     - ReadWriteOnce
                     resources:
                       requests:
-                        storage: 1Gi                                        
+                        storage: 4Gi                                        
                 entrypoint: start-step
                       
                 arguments:
@@ -64,7 +77,7 @@ spec:
                 templates:
                   - name: start-step
                     steps: 
-                    - - name: build-image 
+                    - - name: get-cache-image
                         arguments:
                           parameters:
                             - name: name
@@ -75,6 +88,47 @@ spec:
                               value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
                             - name: updated_at
                               value: '{{workflow.parameters.updated_at}}'
+                        templateRef: 
+                          name: ci
+                          template: get-cache-image      
+                    # - - name: build-store-image 
+                    #     arguments:
+                    #       parameters:
+                    #         - name: name
+                    #           value: '{{workflow.parameters.name}}'                          
+                    #         - name: env
+                    #           value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                    #         - name: app
+                    #           value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                    #         - name: updated_at
+                    #           value: '{{workflow.parameters.updated_at}}'
+                    #         - name: updated_image_targetat
+                    #           value: store                            
+                    #     templateRef: 
+                    #       name: ci
+                    #       template: build-image                                            
+                    - - name: build-prod-pkg-image 
+                        arguments:
+                          parameters:
+                            - name: name
+                              value: '{{workflow.parameters.name}}'                          
+                            - name: env
+                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[0]}}'
+                            - name: app
+                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                     
+                            - name: updated_at
+                              value: '{{workflow.parameters.updated_at}}'
+                            # - name: image_target
+                            #   value: cache-store                             
+                            # - name: image_target
+                            #   value: cache-prod-pkg
+                            # - name: image_name
+                            #   value: cache-prod-pkg
+                            # app
+                            - name: image_target
+                              value: app                
+                            - name: image_name
+                              value: '{{=sprig.splitList("-",sprig.splitList("/",workflow.parameters.ref)[2])[1]}}'                      
                         templateRef: 
                           name: ci
                           template: build-image                         
