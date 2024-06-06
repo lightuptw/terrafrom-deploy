@@ -4,9 +4,9 @@ resource "helm_release" "eg" {
   repository = "oci://docker.io/envoyproxy"
   chart = "gateway-helm"
   version = "v1.0.1"
-#   values = [
-#     file("${path.module}/values.yaml")
-#   ]
+  values = [
+    file("${path.module}/values.yaml")
+  ]
 }
 
 # resource "time_sleep" "wait_30_seconds" {
