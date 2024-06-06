@@ -13,15 +13,9 @@ spec:
               from: All        
       protocol: HTTP
       port: 80
-    - name: tcp
-      protocol: TCP
-      port: 8089
-      allowedRoutes:
-        kinds:
-        - kind: TCPRoute  
     - name: https
       protocol: HTTPS
-      hostname: "*.hq.lightup.tw"
+      hostname: "*.ms.lightup.tw"
       port: 443
       tls:
         mode: Terminate

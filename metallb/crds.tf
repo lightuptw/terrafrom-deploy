@@ -1,14 +1,20 @@
-resource "kubectl_manifest" "BGPPeer" {
-  yaml_body = file("crds/bgpper.yaml")
-}
-
 resource "kubectl_manifest" "IPAddressPool" {
   yaml_body = file("crds/iPAddressPool.yaml")
 }
 
-resource "kubectl_manifest" "BGPAdvertisement" {
-  yaml_body = file("crds/bGPAdvertisement.yaml")
+resource "kubectl_manifest" "L2Advertisement" {
+  yaml_body = file("crds/l2Advertisement.yaml")
 }
+
+
+// bgp
+# resource "kubectl_manifest" "BGPPeer" {
+#   yaml_body = file("crds/bgpper.yaml")
+# }
+
+# resource "kubectl_manifest" "BGPAdvertisement" {
+#   yaml_body = file("crds/bGPAdvertisement.yaml")
+# }
 
 
 # resource "kubernetes_manifest" "IPAddressPool" {
