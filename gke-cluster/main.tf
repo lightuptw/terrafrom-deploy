@@ -47,7 +47,6 @@ resource "google_container_cluster" "lightup_ms" {
     }
   }
 
-
   ip_allocation_policy {
     stack_type                    = "IPV4"
     services_secondary_range_name = google_compute_subnetwork.lightup_ms.secondary_ip_range[0].range_name
@@ -76,17 +75,24 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     preemptible  = true
     machine_type = "e2-medium"
 
+    
+    
+
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     # service_account = google_service_account.default.email
     oauth_scopes    = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
   }
+
+  network_config {
+    enable_private_nodes = true
+  }
 }
 
-resource "google_compute_address" "lightup_ms_static_ip" {
-  name         = "lightup-ms"
-  address_type = "EXTERNAL"
-  project =  "lightup-tw"
-  region     = "asia-east1"
-}
+# resource "google_compute_address" "lightup_ms_static_ip" {
+#   name         = "lightup-ms"
+#   address_type = "EXTERNAL"
+#   project =  "lightup-tw"
+#   region     = "asia-east1"
+# }
