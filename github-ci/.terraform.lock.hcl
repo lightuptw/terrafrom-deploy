@@ -50,3 +50,7 @@ provider "registry.opentofu.org/hashicorp/kubernetes" {
     "zh:f026a8b4fa2ca566c3d6cd9bfdd0dd58c0631e3d945b98a8ced0943aa27dd4bd",
   ]
 }
+
+
+gcloud container clusters get-credentials microservices \
+    --region=asia-east1 --internal-ip 

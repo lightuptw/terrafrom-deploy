@@ -1,0 +1,18 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq-cluster
+spec:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 500Mi
+    limits:
+      cpu: 400m
+      memory: 1Gi
+  # override:
+  #   service:
+  #     spec:
+  #       type: ExternalName
+  #       externalName: service-y.namespace-b.svc.cluster.local
