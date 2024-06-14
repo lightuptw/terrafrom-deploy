@@ -47,15 +47,26 @@ resource "google_container_cluster" "lightup_ms" {
     http_load_balancing {
       disabled = false
     }
+    horizontal_pod_autoscaling {
+      disabled = false
+    }
+
   }
   
   cluster_autoscaling {
-    enabled = true
+    enabled = false
     resource_limits {
       resource_type = "cpu"
-      minimum       = 6
+      minimum       = 8
       maximum       = 18
     }
+
+    resource_limits {
+      resource_type = "memory"
+      minimum       = 8
+      maximum       = 18
+    }
+
   }
 
   ip_allocation_policy {
@@ -71,12 +82,11 @@ resource "google_container_cluster" "lightup_ms" {
   deletion_protection = true
 }
 
-resource "google_container_node_pool" "primary_preemptible_nodes" {
-  name       = "ms-node-pool"
+resource "google_container_node_pool" "production_nodes" {
+  name       = "production-nodes"
   location   = "asia-east1"
   project = "lightup-tw"
   cluster    = google_container_cluster.lightup_ms.name
-  node_count = 1
 
   node_locations = [
     "asia-east1-a",
@@ -84,9 +94,162 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     "asia-east1-c",
   ]
 
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 6
+    location_policy = "BALANCED"
+  }
+
   node_config {
-    preemptible  = true
+    spot  = true
     machine_type = "e2-medium"
+
+    disk_size_gb = "20"
+
+    resource_labels = {
+      production = true
+    }
+
+    labels = {
+      production = true
+    }
+
+    # reservation_affinity = {
+    #   consume_reservation_type = "SPECIFIC_RESERVATION"
+    # }
+
+    taint {
+      key = "development"
+      value = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    taint {
+      key = "database"
+      value = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+
+
+    # sole_tenant_config {
+    #   node_affinity {
+    #     key = "compute.googleapis.com/node-group-name"
+    #     operator =  "IN"
+    #     values = ["true"]
+    #   }
+    # }
+
+
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    # service_account = google_service_account.default.email
+    oauth_scopes    = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+
+  network_config {
+    enable_private_nodes = true
+  }
+}
+
+resource "google_container_node_pool" "development_nodes" {
+  name       = "development-nodes"
+  location   = "asia-east1"
+  project = "lightup-tw"
+  cluster    = google_container_cluster.lightup_ms.name
+
+  node_locations = [
+    "asia-east1-a",
+  ]
+  node_count = 1
+  # autoscaling {
+  #   min_node_count = 1
+  #   max_node_count = 6
+  #   location_policy = "BALANCED"
+  # }
+
+  node_config {
+    spot  = true
+    machine_type = "e2-medium"
+
+    labels = {
+      development = true
+    }
+
+    taint {
+      key = "production"
+      value = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    taint {
+      key = "database"
+      value = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    # sole_tenant_config {
+    #   node_affinity {
+    #     key = "production"
+    #     operator =  "IN"
+    #     values = "true"
+    #   }
+    # }
+
+    
+
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    # service_account = google_service_account.default.email
+    oauth_scopes    = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
+
+  network_config {
+    enable_private_nodes = true
+  }
+}
+
+resource "google_container_node_pool" "postgres_nodes" {
+  name       = "postgres-nodes"
+  location   = "asia-east1"
+  project = "lightup-tw"
+  cluster    = google_container_cluster.lightup_ms.name
+
+  node_count = 1
+
+  node_locations = [
+    "asia-east1-a",
+  ]
+
+  node_config {
+    machine_type = "e2-medium"
+
+
+    labels = {
+      postgres = true
+    }
+
+    taint {
+      key = "production"
+      value = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    taint {
+      key = "development"
+      value = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    # sole_tenant_config {
+    #   node_affinity {
+    #     key = "postgres"
+    #     operator =  "IN"
+    #     values = ["true"]
+    #   }
+    # }
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     # service_account = google_service_account.default.email

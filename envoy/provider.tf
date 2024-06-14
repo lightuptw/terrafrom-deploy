@@ -1,4 +1,9 @@
 terraform {
+  backend "gcs" {
+    bucket = "tofu_state_lightup"
+    prefix  = "state/envoy"
+  }
+
   required_providers {
     kubernetes = {
       source = "hashicorp/kubernetes"

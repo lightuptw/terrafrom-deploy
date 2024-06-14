@@ -28,12 +28,35 @@ module "cert_manager" {
     }
   ]
 
+  # additional_set = list(
+  #   object({
+  #     name  = "featureGates"
+  #     value = "ExperimentalGatewayAPISupport=true"
+  #   }),
+  #   object({
+  #     name  = "cainjector.nodeSelector"
+  #     value = "production=true"
+  #   }),
+  #   object({
+  #     name  = "webhook.nodeSelector"
+  #     value = "production=true"
+  #   }),
+  #   object({
+  #     name  = "startupapicheck.nodeSelector"
+  #     value = "production=true"
+  #   }),
+  #   object({
+  #     name  = "nodeSelector"
+  #     value = "production=true"
+  #   }),        
+  # )
   additional_set = [
     {
         name  = "featureGates"
         value = "ExperimentalGatewayAPISupport=true"
     }
   ]
+  
 }
 
 
