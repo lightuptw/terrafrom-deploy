@@ -53,21 +53,21 @@ resource "google_container_cluster" "lightup_ms" {
 
   }
   
-  cluster_autoscaling {
-    enabled = false
-    resource_limits {
-      resource_type = "cpu"
-      minimum       = 8
-      maximum       = 18
-    }
+  # cluster_autoscaling {
+  #   enabled = false
+  #   resource_limits {
+  #     resource_type = "cpu"
+  #     minimum       = 8
+  #     maximum       = 18
+  #   }
 
-    resource_limits {
-      resource_type = "memory"
-      minimum       = 8
-      maximum       = 18
-    }
+  #   resource_limits {
+  #     resource_type = "memory"
+  #     minimum       = 8
+  #     maximum       = 18
+  #   }
 
-  }
+  # }
 
   ip_allocation_policy {
     stack_type                    = "IPV4"
