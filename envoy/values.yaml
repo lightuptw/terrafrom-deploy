@@ -1,6 +1,32 @@
 deployment:
   replicas: 1
+
   pod:
     labels: 
-      production: true
+      production: "true"
+    tolerations: 
+    - key: "production"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            production: "true"
+
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '19001'          
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/machine-family
+              operator: In
+              values:
+              - e2
  

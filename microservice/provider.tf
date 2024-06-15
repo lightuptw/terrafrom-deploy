@@ -1,8 +1,7 @@
 terraform {
   backend "gcs" {
     bucket = "tofu_state_lightup"
-    # region = "asia-east-1"
-    prefix  = "state/argo-cd"
+    prefix  = "state/microservices"
   }
 
   required_providers {
@@ -15,7 +14,6 @@ terraform {
     }
   }
 }
-
 
 provider "helm" {
   kubernetes {

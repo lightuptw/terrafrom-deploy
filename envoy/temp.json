@@ -1,0 +1,60 @@
+{
+  "apiVersion": "v1",
+  "kind": "Namespace",
+  "metadata": {
+    "annotations": {
+      "name": "envoy-gateway"
+    },
+    "creationTimestamp": "2024-06-14T06:35:54Z",
+    "deletionTimestamp": "2024-06-14T09:20:17Z",
+    "labels": {
+      "kubernetes.io/metadata.name": "envoy-gateway-system"
+    },
+    "name": "envoy-gateway-system",
+    "resourceVersion": "547526",
+    "uid": "7d25b2a9-b16b-4783-b371-1d0e9433fdd6"
+  },
+  "spec": {
+    "finalizers": []
+  },
+  "status": {
+    "conditions": [
+      {
+        "lastTransitionTime": "2024-06-14T09:20:25Z",
+        "message": "All resources successfully discovered",
+        "reason": "ResourcesDiscovered",
+        "status": "False",
+        "type": "NamespaceDeletionDiscoveryFailure"
+      },
+      {
+        "lastTransitionTime": "2024-06-14T09:20:25Z",
+        "message": "All legacy kube types successfully parsed",
+        "reason": "ParsedGroupVersions",
+        "status": "False",
+        "type": "NamespaceDeletionGroupVersionParsingFailure"
+      },
+      {
+        "lastTransitionTime": "2024-06-14T09:20:25Z",
+        "message": "All content successfully deleted, may be waiting on finalization",
+        "reason": "ContentDeleted",
+        "status": "False",
+        "type": "NamespaceDeletionContentFailure"
+      },
+      {
+        "lastTransitionTime": "2024-06-14T09:20:25Z",
+        "message": "Some resources are remaining: pods. has 1 resource instances, services. has 1 resource instances",
+        "reason": "SomeResourcesRemain",
+        "status": "True",
+        "type": "NamespaceContentRemaining"
+      },
+      {
+        "lastTransitionTime": "2024-06-14T09:20:25Z",
+        "message": "Some content in the namespace has finalizers remaining: service.kubernetes.io/load-balancer-cleanup in 1 resource instances",
+        "reason": "SomeFinalizersRemain",
+        "status": "True",
+        "type": "NamespaceFinalizersRemaining"
+      }
+    ],
+    "phase": "Terminating"
+  }
+}

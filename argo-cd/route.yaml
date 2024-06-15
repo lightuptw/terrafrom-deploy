@@ -5,9 +5,9 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - name: eg
+    - name: eg-deploy
   hostnames:
-    - "argo-cd.hq.lightup.tw"
+    - "argocd.deploy.lightup.tw"
   rules:
     - backendRefs:
         - group: ""

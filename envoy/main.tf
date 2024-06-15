@@ -3,7 +3,7 @@ resource "helm_release" "eg" {
   namespace  = "envoy-gateway-system"
   repository = "oci://docker.io/envoyproxy"
   chart = "gateway-helm"
-  version = "v1.0.1"
+  version = "v1.0.2"
   values = [
     file("${path.module}/values.yaml")
   ]

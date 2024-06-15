@@ -54,10 +54,6 @@ module "cert_manager" {
     {
         name  = "featureGates"
         value = "ExperimentalGatewayAPISupport=true"
-    },
-    {
-        name  = "nodeSelector"
-        value = "production=true"
     }
   ]
   

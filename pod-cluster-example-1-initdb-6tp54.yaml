@@ -1,0 +1,248 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2024-06-14T11:05:03Z"
+  finalizers:
+  - batch.kubernetes.io/job-tracking
+  generateName: cluster-example-1-initdb-
+  labels:
+    batch.kubernetes.io/controller-uid: bc36fe5c-ab51-4089-9686-85b7602a6b8e
+    batch.kubernetes.io/job-name: cluster-example-1-initdb
+    cnpg.io/cluster: cluster-example
+    cnpg.io/instanceName: cluster-example-1
+    cnpg.io/jobRole: initdb
+    controller-uid: bc36fe5c-ab51-4089-9686-85b7602a6b8e
+    job-name: cluster-example-1-initdb
+  name: cluster-example-1-initdb-6tp54
+  namespace: cnpg-system
+  ownerReferences:
+  - apiVersion: batch/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Job
+    name: cluster-example-1-initdb
+    uid: bc36fe5c-ab51-4089-9686-85b7602a6b8e
+  resourceVersion: "617106"
+  uid: 035f0837-d26a-436c-92eb-03a5c51df192
+spec:
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: cnpg.io/cluster
+              operator: In
+              values:
+              - cluster-example
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+  containers:
+  - command:
+    - /controller/manager
+    - instance
+    - init
+    - --initdb-flags
+    - --encoding=UTF8 --lc-collate=C --lc-ctype=C
+    - --app-db-name
+    - app
+    - --app-user
+    - app
+    - --log-level=info
+    env:
+    - name: PGDATA
+      value: /var/lib/postgresql/data/pgdata
+    - name: POD_NAME
+      value: cluster-example-1-initdb
+    - name: NAMESPACE
+      value: cnpg-system
+    - name: CLUSTER_NAME
+      value: cluster-example
+    - name: PGPORT
+      value: "5432"
+    - name: PGHOST
+      value: /controller/run
+    image: ghcr.io/cloudnative-pg/postgresql:16.3
+    imagePullPolicy: IfNotPresent
+    name: initdb
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/lib/postgresql/data
+      name: pgdata
+    - mountPath: /run
+      name: scratch-data
+    - mountPath: /controller
+      name: scratch-data
+    - mountPath: /dev/shm
+      name: shm
+    - mountPath: /etc/app-secret
+      name: app-secret
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-kqrln
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: cluster-example-1-initdb
+  initContainers:
+  - command:
+    - /manager
+    - bootstrap
+    - /controller/manager
+    - --log-level=info
+    image: ghcr.io/cloudnative-pg/cloudnative-pg:1.23.2
+    imagePullPolicy: IfNotPresent
+    name: bootstrap-controller
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/lib/postgresql/data
+      name: pgdata
+    - mountPath: /run
+      name: scratch-data
+    - mountPath: /controller
+      name: scratch-data
+    - mountPath: /dev/shm
+      name: shm
+    - mountPath: /etc/app-secret
+      name: app-secret
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-kqrln
+      readOnly: true
+  nodeName: gke-microservices-postgres-nodes-e542c568-407m
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext:
+    fsGroup: 26
+    runAsGroup: 26
+    runAsNonRoot: true
+    runAsUser: 26
+    seccompProfile:
+      type: RuntimeDefault
+  serviceAccount: cluster-example
+  serviceAccountName: cluster-example
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoSchedule
+    key: database
+    operator: Equal
+    value: "true"
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: pgdata
+    persistentVolumeClaim:
+      claimName: cluster-example-1
+  - emptyDir: {}
+    name: scratch-data
+  - emptyDir:
+      medium: Memory
+    name: shm
+  - name: app-secret
+    secret:
+      defaultMode: 420
+      secretName: cluster-example-app
+  - name: kube-api-access-kqrln
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-14T11:05:07Z"
+    status: "False"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-14T11:05:07Z"
+    message: 'containers with incomplete status: [bootstrap-controller]'
+    reason: ContainersNotInitialized
+    status: "False"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-14T11:05:07Z"
+    message: 'containers with unready status: [initdb]'
+    reason: ContainersNotReady
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-14T11:05:07Z"
+    message: 'containers with unready status: [initdb]'
+    reason: ContainersNotReady
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-06-14T11:05:07Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - image: ghcr.io/cloudnative-pg/postgresql:16.3
+    imageID: ""
+    lastState: {}
+    name: initdb
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      waiting:
+        reason: PodInitializing
+  hostIP: 10.40.0.6
+  hostIPs:
+  - ip: 10.40.0.6
+  initContainerStatuses:
+  - image: ghcr.io/cloudnative-pg/cloudnative-pg:1.23.2
+    imageID: ""
+    lastState: {}
+    name: bootstrap-controller
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      waiting:
+        reason: PodInitializing
+  phase: Pending
+  qosClass: BestEffort
+  startTime: "2024-06-14T11:05:07Z"
