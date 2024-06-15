@@ -1,13 +1,18 @@
 deployment:
   replicas: 1
 
+  envoyGateway: 
+    resources:
+      requests: 
+        cpu: 0m
+
   pod:
     labels: 
       production: "true"
     tolerations: 
-    - key: "production"
+    - key: "environment"
       operator: "Equal"
-      value: "true"
+      value: "production"
       effect: "NoSchedule"
     topologySpreadConstraints:
       - maxSkew: 1
@@ -15,7 +20,7 @@ deployment:
         whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
-            production: "true"
+            environment: "production"
 
     annotations:
       prometheus.io/scrape: 'true'

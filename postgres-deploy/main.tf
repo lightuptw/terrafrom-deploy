@@ -4,9 +4,9 @@ resource "helm_release" "cnpg" {
   repository = "https://cloudnative-pg.github.io/charts"
   chart = "cloudnative-pg"
   version = "v0.21.5"
-#   values = [
-#     file("${path.module}/values.yaml")
-#   ]
+  values = [
+    file("${path.module}/values.yaml")
+  ]
 
 #   set {
 #     name = "namespace"
@@ -27,22 +27,22 @@ resource "kubernetes_namespace" "cnpg-system-ns" {
 }
 
 
-resource "kubectl_manifest" "app_guestbook" {
-  yaml_body = <<-EOF
-    apiVersion: argoproj.io/v1alpha1
-    kind: Application
-    metadata:
-        name: postgres
-        namespace: argo-cd
-    spec:
-        project: postgres
-        source:
-            repoURL: git@github.com:lightuptw/deploy.git
-            targetRevision: HEAD
-            path: postgres
-        destination:
-            server: https://kubernetes.default.svc
-            namespace: cnpg-system
-    EOF
+# resource "kubectl_manifest" "app_guestbook" {
+#   yaml_body = <<-EOF
+#     apiVersion: argoproj.io/v1alpha1
+#     kind: Application
+#     metadata:
+#         name: postgres
+#         namespace: argo-cd
+#     spec:
+#         project: postgres
+#         source:
+#             repoURL: git@github.com:lightuptw/deploy.git
+#             targetRevision: HEAD
+#             path: postgres
+#         destination:
+#             server: https://kubernetes.default.svc
+#             namespace: cnpg-system
+#     EOF
 
-}
+# }
