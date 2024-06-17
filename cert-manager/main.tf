@@ -54,6 +54,10 @@ module "cert_manager" {
     {
         name  = "featureGates"
         value = "ExperimentalGatewayAPISupport=true"
+    },
+    {
+       name = "extraArgs"
+       value = "{--dns01-recursive-nameservers-only,--dns01-recursive-nameservers=1.1.1.1:53}"
     }
   ]
   

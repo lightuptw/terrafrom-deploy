@@ -17,3 +17,43 @@ resource "kubernetes_namespace" "argo-cd-ns" {
     name = "argo-cd"
   }
 }
+
+variable oidc_secret {
+  type = string
+  sensitive   = true
+}
+
+variable odic_clientId {
+  type = string
+  sensitive   = true
+}
+
+variable odic_issuer {
+  type = string
+  sensitive   = true
+}
+
+variable odic_redirect_uri {
+  type = string
+  sensitive   = true
+}
+
+resource "kubernetes_secret" "oidc_secret" {
+  metadata {
+    name = "dex"
+    namespace = "argo-cd"
+    labels = {
+       "app.kubernetes.io/part-of" = "argocd"
+    }
+  }
+
+  data = {
+    "clientId" = var.odic_clientId 
+    "clientSecret" = var.oidc_secret
+    "issuer" = var.odic_issuer
+    "redirect_uri" = var.odic_redirect_uri
+    
+  }
+  
+}
+

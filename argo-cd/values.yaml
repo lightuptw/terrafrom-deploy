@@ -39,7 +39,7 @@ crds:
 global:
   # -- Default domain used by all components
   ## Used for ingresses, certificates, SSO, notifications, etc.
-  domain: argocd.example.com
+  domain: argocd.ms.lightup.tw
 
   # -- Common labels for the all resources
   additionalLabels: {}
@@ -196,6 +196,19 @@ configs:
     #         clientSecret: $dex.github.clientSecret # Alternatively $<some_K8S_secret>:dex.github.clientSecret
     #         orgs:
     #         - name: your-github-org
+    dex.config: |
+      connectors:
+        - type: oidc
+          id: google
+          name: Google
+          config:
+            clientID: $dex:clientId
+            clientSecret: $dex:clientSecret
+            issuer: $dex:issuer
+            redirectURI: $dex:redirect_uri
+            requestedScopes: 
+              - email
+            adminEmail: jack@lightup.tw
 
     # OIDC configuration as an alternative to dex (optional).
     # oidc.config: |
