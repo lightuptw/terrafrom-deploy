@@ -153,6 +153,7 @@ resource "google_container_node_pool" "production_base_nodes" {
 
     labels = {
       environment = "production"
+      base = "true"
     }
 
 
@@ -168,55 +169,58 @@ resource "google_container_node_pool" "production_base_nodes" {
   }
 }
 
-resource "google_container_node_pool" "production_nodes" {
-  name       = "production-nodes"
-  location   = "asia-east1"
-  project = "lightup-tw"
-  cluster    = google_container_cluster.lightup_ms.name
+# resource "google_container_node_pool" "production_nodes" {
+#   name       = "production-nodes"
+#   location   = "asia-east1"
+#   project = "lightup-tw"
+#   cluster    = google_container_cluster.lightup_ms.name
 
-  # initial_node_count = 1
+#   node_locations = [
+#     "asia-east1-a",
+#     "asia-east1-b",
+#     "asia-east1-c",
+#   ]
 
-  node_locations = [
-    "asia-east1-a",
-    "asia-east1-b",
-    "asia-east1-c",
-  ]
-  
+#   autoscaling {
+#     min_node_count = 0
+#     max_node_count = 6
+#     location_policy = "BALANCED"
+#   }
 
-  autoscaling {
-    min_node_count = 0
-    max_node_count = 6
-    location_policy = "BALANCED"
-  }
+#   node_config {
+#     spot  = true
+#     machine_type = "e2-medium"
 
-  node_config {
-    spot  = true
-    machine_type = "e2-medium"
+#     disk_size_gb = "20"
 
-    disk_size_gb = "20"
+#     tags = ["production"]
 
-    tags = ["production"]
+#     taint {
+#       key = "stateless"
+#       value = "true"
+#       effect = "NO_SCHEDULE"
+#     }
 
-    resource_labels = {
-      production = true
-      environment = "production"
-    }
+#     resource_labels = {
+#       production = true
+#       environment = "production"
+#     }
 
-    labels = {
-      environment = "production"
-    }
+#     labels = {
+#       environment = "production"
+#     }
 
-    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
-    # service_account = google_service_account.default.email
-    oauth_scopes    = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-  }
+#     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+#     # service_account = google_service_account.default.email
+#     oauth_scopes    = [
+#       "https://www.googleapis.com/auth/cloud-platform"
+#     ]
+#   }
 
-  network_config {
-    enable_private_nodes = true
-  }
-}
+#   network_config {
+#     enable_private_nodes = true
+#   }
+# }
 
 resource "google_container_node_pool" "development_nodes" {
   name       = "development-nodes"
@@ -291,8 +295,8 @@ resource "google_container_node_pool" "development_nodes" {
 #   }
 # }
 
-resource "google_container_node_pool" "postgres_nodes" {
-  name       = "postgres-nodes"
+resource "google_container_node_pool" "stateful_nodes" {
+  name       = "stateful-nodes"
   location   = "asia-east1"
   project = "lightup-tw"
   cluster    = google_container_cluster.lightup_ms.name
@@ -301,6 +305,8 @@ resource "google_container_node_pool" "postgres_nodes" {
 
   node_locations = [
     "asia-east1-a",
+    "asia-east1-b",
+    "asia-east1-c",
   ]
 
   node_config {
@@ -308,10 +314,11 @@ resource "google_container_node_pool" "postgres_nodes" {
 
     labels = {
       postgres = true
+      stateful = true
     }
 
     taint {
-      key = "database"
+      key = "stateful"
       value = "true"
       effect = "NO_SCHEDULE"
     }
