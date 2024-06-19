@@ -1,4 +1,3 @@
-
 resource "kubernetes_secret" "webhook_secret" {
   metadata {
     name = "argocd-webhook-secret"
@@ -9,7 +8,7 @@ resource "kubernetes_secret" "webhook_secret" {
   }
 
   binary_data = {
-    "webhook.github.secret" = base64encode("Syp76ve7MZbEYSYUX8SMdYhUFH57mUY9") 
+    "webhook.github.secret" = base64encode(var.github_webhook_secret) 
   }
   
 }

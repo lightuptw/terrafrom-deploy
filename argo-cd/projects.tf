@@ -18,3 +18,9 @@ resource "kubectl_manifest" "postgres_project" {
     project = "postgres"
   })
 }
+
+resource "kubectl_manifest" "uaa_project" {
+  yaml_body = templatefile("${path.module}/project.tftpl", {
+    project = "uaa"
+  })
+}

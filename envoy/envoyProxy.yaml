@@ -9,9 +9,9 @@ spec:
     kubernetes:
       envoyService:
         type: LoadBalancer
-        loadBalancerIP: 35.236.149.27
+        loadBalancerIP: 35.221.129.68
       envoyHpa:
-        minReplicas: 3
+        minReplicas: 1
         maxReplicas: 9
         metrics:
           - resource:
