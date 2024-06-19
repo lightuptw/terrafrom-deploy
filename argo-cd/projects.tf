@@ -24,3 +24,9 @@ resource "kubectl_manifest" "uaa_project" {
     project = "uaa"
   })
 }
+
+resource "kubectl_manifest" "infrastructure_project" {
+  yaml_body = templatefile("${path.module}/project.tftpl", {
+    project = "infrastructure"
+  })
+}
