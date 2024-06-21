@@ -120,7 +120,7 @@ resource "google_container_cluster" "lightup_development" {
 }
 
 resource "google_container_node_pool" "production_base_nodes" {
-  name       = "production-base-nodes"
+  name       = "production-base-node-pool"
   location   = "asia-east1"
   project = "lightup-tw"
   cluster    = google_container_cluster.lightup_ms.name
