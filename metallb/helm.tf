@@ -12,8 +12,8 @@ resource "helm_release" "metallb" {
   ]
 }
 
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_10_seconds" {
   depends_on = [kubernetes_namespace.metallb-system]
 
-  destroy_duration = "30s"
+  destroy_duration = "10s"
 }

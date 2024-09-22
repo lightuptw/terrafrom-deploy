@@ -1,0 +1,22 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: custom-proxy-config
+  namespace: envoy-gateway-system
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        type: LoadBalancer
+        loadBalancerIP: "10.10.2.10"
+      envoyHpa:
+        minReplicas: 3
+        maxReplicas: 3
+        metrics:
+          - resource:
+              name: cpu
+              target:
+                averageUtilization: 60
+                type: Utilization
+            type: Resource

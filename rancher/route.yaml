@@ -1,21 +1,21 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: argocd-route
-  namespace: envoy-gateway
+  name: rancher-route
+  namespace: default
 spec:
   parentRefs:
-    - name: eg-default
-      namespace: envoy-gateway
+    - name: eg
+      namespace: default
   hostnames:
-    - "argocd.ms.lightup.tw"
+    - "dash.rancher.lightup.tw"
   rules:
     - backendRefs:
         - group: ""
           kind: Service
-          namespace: argo-cd
-          name: argo-cd-argocd-server
-          port: 443
+          namespace: cattle-system
+          name: rancher
+          port: 80
           weight: 1
       matches:
         - path:

@@ -1,0 +1,6 @@
+[masters]
+10.10.2.21 ansible_ssh_user=worker ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+10.10.2.22 ansible_ssh_user=worker ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+10.10.2.23 ansible_ssh_user=worker ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+[k8s_cluster:children]
+masters

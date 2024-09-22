@@ -1,10 +1,18 @@
-resource "kubectl_manifest" "IPAddressPool" {
-  yaml_body = file("crds/iPAddressPool.yaml")
+resource "time_sleep" "wait_10_seconds_crds" {
+  depends_on = [helm_release.metallb]
+
+  destroy_duration = "10s"
 }
 
-resource "kubectl_manifest" "L2Advertisement" {
-  yaml_body = file("crds/l2Advertisement.yaml")
-}
+# resource "kubectl_manifest" "IPAddressPool" {
+#   yaml_body = file("crds/iPAddressPool.yaml")
+#   depends_on = [helm_release.metallb, time_sleep.wait_10_seconds_crds]
+# }
+
+# resource "kubectl_manifest" "L2Advertisement" {
+#   yaml_body = file("crds/l2Advertisement.yaml")
+#   depends_on = [helm_release.metallb, time_sleep.wait_10_seconds_crds]
+# }
 
 
 // bgp
@@ -17,41 +25,41 @@ resource "kubectl_manifest" "L2Advertisement" {
 # }
 
 
-# resource "kubernetes_manifest" "IPAddressPool" {
-#   manifest = {
-#     apiVersion = "metallb.io/v1beta1"
-#     kind       = "IPAddressPool"
+resource "kubernetes_manifest" "IPAddressPool" {
+  manifest = {
+    apiVersion = "metallb.io/v1beta1"
+    kind       = "IPAddressPool"
 
-#     metadata = {
-#       name = "first-pool"
-#       namespace = "metallb-system"
-#     }
+    metadata = {
+      name = "rancher-pool"
+      namespace = "metallb-system"
+    }
 
-#     spec = {
-#         addresses = [
-#             "192.168.0.150/32"
-#         ]
+    spec = {
+        addresses = [
+            "10.10.2.20/32"
+        ]
 
-#     }
-#   }
-# }
+    }
+  }
+}
 
-# resource "kubernetes_manifest" "L2Advertisement" {
-#   manifest = {
-#     apiVersion = "metallb.io/v1beta1"
-#     kind       = "L2Advertisement"
+resource "kubernetes_manifest" "L2Advertisement" {
+  manifest = {
+    apiVersion = "metallb.io/v1beta1"
+    kind       = "L2Advertisement"
 
-#     metadata = {
-#       name = "example"
-#       namespace = "metallb-system"
-#     }
+    metadata = {
+      name = "rancher-l2"
+      namespace = "metallb-system"
+    }
 
-#     spec = {
-#         ipAddressPools = [
-#             "first-pool"
-#         ]
+    spec = {
+        ipAddressPools = [
+            "rancher-pool"
+        ]
 
-#     }
-#   }
-# }
+    }
+  }
+}
 

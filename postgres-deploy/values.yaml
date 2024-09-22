@@ -1,5 +1,0 @@
-tolerations: 
-  - key: "database"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"

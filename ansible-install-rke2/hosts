@@ -1,8 +1,0 @@
-[rke21]
-192.168.100.11 ansible_ssh_user=jack ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
-[masters]
-192.168.100.6 ansible_ssh_user=jack ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
-192.168.100.7 ansible_ssh_user=jack ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
-192.168.100.8 ansible_ssh_user=jack ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
-[k8s_cluster:children]
-masters

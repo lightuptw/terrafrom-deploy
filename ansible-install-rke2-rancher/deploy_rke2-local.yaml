@@ -1,0 +1,22 @@
+- name: Deploy RKE2
+  hosts: k8s_cluster
+  become: true
+  roles:
+    - role: lablabs.rke2
+  vars:
+    rke2_type: server
+    rke2_version: v1.30.4+rke2r1
+    rke2_ha_mode: true
+    rke2_api_ip: 10.10.2.30
+    rke2_disable:
+      - rke2-ingress-nginx
+    # disable_kube_proxy: true
+    rke2_cni:
+      - cilium
+    rke2_download_kubeconf: true
+   
+    rke2_cluster_cidr:
+      - 192.42.0.0/16            
+    rke2_service_cidr:
+      - 192.43.0.0/16      
+

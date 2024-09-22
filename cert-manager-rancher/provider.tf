@@ -1,7 +1,8 @@
 terraform {
+
   backend "gcs" {
     bucket = "tofu_state_lightup"
-    prefix  = "state/cnpg"
+    prefix  = "state/cert-manager-rancher"
   }
 
   required_providers {
@@ -14,6 +15,7 @@ terraform {
     }
   }
 }
+
 
 provider "helm" {
   kubernetes {

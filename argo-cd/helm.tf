@@ -36,3 +36,22 @@ resource "kubernetes_secret" "oidc_secret" {
   
 }
 
+resource "kubernetes_secret" "helm_oci_secret" {
+  metadata {
+    name = "docker-io-helm-oci"
+    namespace = "argo-cd"
+    labels = {
+       "app.kubernetes.io/part-of" = "argocd"
+       "argocd.argoproj.io/secret-type" = "repository"
+    }
+  }
+
+  binary_data = {
+    "url" =  base64encode("registry-1.docker.io/bitnamicharts")
+    "name" = base64encode("bitnamicharts")
+    "type" = base64encode("helm")
+    "enableOCI" = base64encode("true")
+  }
+  
+}
+

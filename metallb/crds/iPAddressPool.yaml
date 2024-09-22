@@ -1,8 +1,9 @@
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: first-pool
+  name: rancher-ip-pool
   namespace: metallb-system
 spec:
   addresses:
-  - 104.199.163.28/32
+  - 10.10.2.20/32
+  - 10.10.2.30/32

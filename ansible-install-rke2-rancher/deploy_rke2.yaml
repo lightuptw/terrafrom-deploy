@@ -22,13 +22,34 @@
     - role: lablabs.rke2
   vars:
     rke2_type: server
-    rke2_version: v1.28.8+rke2r1
+    rke2_version: v1.30.4+rke2r1
+    rke2_ha_mode: true
+    rke2_api_ip: 10.10.2.10
+
     # rke2_disable:
     #   - rke2-ingress-nginx
     #   - rke2-canal
     # disable_kube_proxy: true
     rke2_cni:
-      - multus
       - cilium
     rke2_download_kubeconf: true
+    rke2_ingress_nginx_values: 
+      controller:
+          config:
+            use-forwarded-headers: "true"
+            enable-real-ip: "true"
+          publishService:
+            enabled: true
+          service:
+            enabled: true
+            type: LoadBalancer
+            externalTrafficPolicy: Local
+            annotations:
+              metallb.universe.tf/loadBalancerIPs: 10.10.2.20
+      
+   
+    rke2_cluster_cidr:
+      - 192.42.0.0/16            
+    rke2_service_cidr:
+      - 192.43.0.0/16      
 

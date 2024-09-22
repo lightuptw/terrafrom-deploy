@@ -1,0 +1,37 @@
+deployment:
+  replicas: 1
+
+  envoyGateway: 
+    resources:
+      requests: 
+        cpu: 0m
+
+  pod:
+    # labels: 
+    #   production: "true"
+    # tolerations: 
+    # - key: "environment"
+    #   operator: "Equal"
+    #   value: "production"
+    #   effect: "NoSchedule"
+    # topologySpreadConstraints:
+    #   - maxSkew: 1
+    #     topologyKey: failure-domain.beta.kubernetes.io/zone
+    #     whenUnsatisfiable: DoNotSchedule
+    #     labelSelector:
+    #       matchLabels:
+    #         environment: "production"
+
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '19001'          
+    # affinity: 
+    #   nodeAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       nodeSelectorTerms:
+    #       - matchExpressions:
+    #         - key: cloud.google.com/machine-family
+    #           operator: In
+    #           values:
+    #           - e2
+ 

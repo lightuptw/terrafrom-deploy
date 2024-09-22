@@ -16,7 +16,7 @@ spec:
       port: 80
     - name: https
       protocol: HTTPS
-      hostname: "*.dev.lightup.tw"
+      hostname: "*.rancher.lightup.tw"
       port: 443
       tls:
         mode: Terminate

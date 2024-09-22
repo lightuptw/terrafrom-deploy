@@ -1,9 +1,4 @@
 terraform {
-  backend "gcs" {
-    bucket = "tofu_state_lightup"
-    prefix  = "state/microservices"
-  }
-
   required_providers {
     kubernetes = {
       source = "hashicorp/kubernetes"
@@ -15,6 +10,10 @@ terraform {
   }
 }
 
+provider "kubectl" {
+  config_path = "~/.kube/config"
+}
+
 provider "helm" {
   kubernetes {
     config_path = "~/.kube/config"
@@ -22,9 +21,5 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
-
-provider "kubectl" {
-  config_path = "~/.kube/config"
+    config_path = "~/.kube/config"
 }

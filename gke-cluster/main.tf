@@ -140,10 +140,10 @@ resource "google_container_node_pool" "production_base_nodes" {
   # }
 
   node_config {
-    spot  = true
-    machine_type = "e2-medium"
+    machine_type = "e2-standard-4"
+    spot = false
 
-    disk_size_gb = "20"
+    disk_size_gb = "60"
     tags = ["production"]
 
     resource_labels = {
@@ -223,12 +223,13 @@ resource "google_container_node_pool" "production_base_nodes" {
 # }
 
 resource "google_container_node_pool" "development_nodes" {
-  name       = "development-nodes"
+  name       = "development-nodes-pool"
   location   = "asia-east1"
   project = "lightup-tw"
   cluster    = google_container_cluster.lightup_development.name
 
   node_locations = [
+    "asia-east1-a",
     "asia-east1-b",
     "asia-east1-c",
   ]
@@ -240,7 +241,9 @@ resource "google_container_node_pool" "development_nodes" {
   # }
 
   node_config {
+    # spot  = false
     spot  = true
+
     machine_type = "e2-medium"
 
     labels = {
@@ -249,7 +252,7 @@ resource "google_container_node_pool" "development_nodes" {
 
     tags = ["development"]
 
-    disk_size_gb = "10"
+    disk_size_gb = "20"
 
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     # service_account = google_service_account.default.email
