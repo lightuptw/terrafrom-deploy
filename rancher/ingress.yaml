@@ -16,4 +16,4 @@ spec:
         type: LoadBalancer
         externalTrafficPolicy: Local
         annotations:
-          metallb.universe.tf/loadBalancerIPs: 10.10.2.20
+          metallb.universe.tf/loadBalancerIPs: 10.10.2.109

@@ -37,11 +37,13 @@ resource "kubernetes_manifest" "IPAddressPool" {
 
     spec = {
         addresses = [
-            "10.10.2.20/32"
+            "10.10.2.100/32"
         ]
 
     }
   }
+
+  depends_on = [ helm_release.metallb, time_sleep.wait_10_seconds_crds ]
 }
 
 resource "kubernetes_manifest" "L2Advertisement" {
@@ -61,5 +63,8 @@ resource "kubernetes_manifest" "L2Advertisement" {
 
     }
   }
+
+  depends_on = [ helm_release.metallb, time_sleep.wait_10_seconds_crds ]
+
 }
 

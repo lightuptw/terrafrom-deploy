@@ -2,7 +2,7 @@ terraform {
   backend "gcs" {
     bucket = "tofu_state_lightup"
     # region = "asia-east-1"
-    prefix  = "state/argo-cd"
+    prefix  = "state/argo-cd-local"
   }
 
   required_providers {

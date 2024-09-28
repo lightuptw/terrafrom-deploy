@@ -1,6 +1,6 @@
 [masters]
-10.10.2.11 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
-10.10.2.12 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
-10.10.2.13 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+10.10.2.101 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+10.10.2.102 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
+10.10.2.103 ansible_ssh_user=rancher ansible_ssh_pass=saqwxz12 ansible_sudo_pass=saqwxz12
 [k8s_cluster:children]
 masters

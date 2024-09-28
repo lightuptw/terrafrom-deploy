@@ -9,7 +9,7 @@ resource "helm_release" "argo-cd-helm" {
     file("${path.module}/values.yaml")
   ]
 
-  # depends_on = [  ]
+  depends_on = [ "kubernetes_namespace.argo-cd-ns" ]
 }
 
 resource "kubernetes_namespace" "argo-cd-ns" {

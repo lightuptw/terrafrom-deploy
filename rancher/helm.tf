@@ -13,6 +13,8 @@ resource "helm_release" "rancher" {
 
   create_namespace = true
 
+  depends_on = [ module.cert_manager ]
+
 }
 
 # resource "time_sleep" "wait_30_seconds" {
