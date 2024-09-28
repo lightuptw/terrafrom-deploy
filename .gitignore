@@ -35,3 +35,4 @@ terraform.rc
 
 infrastructure-repo
 microservices-repo
+uaa-repo

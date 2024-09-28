@@ -1,0 +1,173 @@
+## Argo CD configuration
+## Ref: https://github.com/argoproj/argo-cd
+
+## Globally shared configuration
+global:
+  # -- Default domain used by all components
+  ## Used for ingresses, certificates, SSO, notifications, etc.
+  domain: argocd-dev.lightup.tw
+
+  # -- Common labels for the all resources
+  additionalLabels: {}
+    # app: argo-cd
+
+  # -- Number of old deployment ReplicaSets to retain. The rest will be garbage collected.
+  revisionHistoryLimit: 3
+
+  # Default image used by all components
+  image:
+    # -- If defined, a repository applied to all Argo CD deployments
+    repository: quay.io/argoproj/argocd
+    # -- Overrides the global Argo CD image tag whose default is the chart appVersion
+    tag: ""
+    # -- If defined, a imagePullPolicy applied to all Argo CD deployments
+    imagePullPolicy: IfNotPresent
+
+  # -- Secrets with credentials to pull images from a private registry
+  imagePullSecrets: []
+
+  # Default logging options used by all components
+  logging:
+    # -- Set the global logging format. Either: `text` or `json`
+    format: text
+    # -- Set the global logging level. One of: `debug`, `info`, `warn` or `error`
+    level: info
+
+  # -- Annotations for the all deployed Statefulsets
+  statefulsetAnnotations: {}
+
+  # -- Annotations for the all deployed Deployments
+  deploymentAnnotations: {}
+
+  # -- Annotations for the all deployed pods
+  podAnnotations: {}
+
+  # -- Labels for the all deployed pods
+  podLabels: {}
+
+  # -- Add Prometheus scrape annotations to all metrics services. This can be used as an alternative to the ServiceMonitors.
+  addPrometheusAnnotations: false
+
+  # -- Toggle and define pod-level security context.
+  # @default -- `{}` (See [values.yaml])
+  securityContext: {}
+  #  runAsUser: 999
+  #  runAsGroup: 999
+  #  fsGroup: 999
+
+  # -- Mapping between IP and hostnames that will be injected as entries in the pod's hosts files
+  hostAliases: []
+  # - ip: 10.20.30.40
+  #   hostnames:
+  #   - git.myhostname
+
+  # Default network policy rules used by all components
+  networkPolicy:
+    # -- Create NetworkPolicy objects for all components
+    create: false
+    # -- Default deny all ingress traffic
+    defaultDenyIngress: false
+
+  # -- Default priority class for all components
+  priorityClassName: ""
+
+  # -- Default node selector for all components
+  nodeSelector: {}
+
+  # -- Default tolerations for all components
+  tolerations: []
+
+  # Default affinity preset for all components
+  affinity:
+    # -- Default pod anti-affinity rules. Either: `none`, `soft` or `hard`
+    podAntiAffinity: soft
+    # Node affinity rules
+    nodeAffinity:
+      # -- Default node affinity rules. Either: `none`, `soft` or `hard`
+      type: hard
+      # -- Default match expressions for node affinity
+      matchExpressions: []
+        # - key: topology.kubernetes.io/zone
+        #   operator: In
+        #   values:
+        #    - antarctica-east1
+        #    - antarctica-west1
+
+  # -- Default [TopologySpreadConstraints] rules for all components
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  ## If labelSelector is left out, it will default to the labelSelector of the component
+  topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+
+  # -- Deployment strategy for the all deployed Deployments
+  deploymentStrategy: {}
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Environment variables to pass to all deployed Deployments
+  env: []
+
+  # -- Annotations for the all deployed Certificates
+  certificateAnnotations: {}
+
+## Argo Configs
+configs:
+  # General Argo CD configuration
+  ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
+  cm:
+    # -- Create the argocd-cm configmap for [declarative setup]
+    create: true
+
+    # Dex configuration
+    # dex.config: |
+    #   connectors:
+    #     # GitHub example
+    #     - type: github
+    #       id: github
+    #       name: GitHub
+    #       config:
+    #         clientID: aabbccddeeff00112233
+    #         clientSecret: $dex.github.clientSecret # Alternatively $<some_K8S_secret>:dex.github.clientSecret
+    #         orgs:
+    #         - name: your-github-org
+    dex.config: |
+      connectors:
+        - type: oidc
+          id: google
+          name: Google
+          config:
+            clientID: $dex:clientId
+            clientSecret: $dex:clientSecret
+            issuer: $dex:issuer
+            redirectURI: $dex:redirect_uri
+            requestedScopes: 
+              - email
+            adminEmail: jack@lightup.tw
+
+    # OIDC configuration as an alternative to dex (optional).
+    # oidc.config: |
+    #   name: AzureAD
+    #   issuer: https://login.microsoftonline.com/TENANT_ID/v2.0
+    #   clientID: CLIENT_ID
+    #   clientSecret: $oidc.azuread.clientSecret
+    #   rootCA: |
+    #     -----BEGIN CERTIFICATE-----
+    #     ... encoded certificate data here ...
+    #     -----END CERTIFICATE-----
+    #   requestedIDTokenClaims:
+    #     groups:
+    #       essential: true
+    #   requestedScopes:
+    #     - openid
+    #     - profile
+    #     - email
+
+dex:
+  # -- Enable dex
+  enabled: true
+  # -- Dex name
+  name: dex-server

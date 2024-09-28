@@ -56,3 +56,5 @@ resource "kubernetes_manifest" "L2Advertisement" {
   depends_on = [ helm_release.metallb ]
 
 }
+
+
