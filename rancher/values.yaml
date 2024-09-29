@@ -1,14 +1,15 @@
 hostname: rancher.lightup.tw
 bootstrapPassword: admin
 ingress:
+  ingressClassName: nginx
   tls:
     source: secret
   extraAnnotations: 
     cert-manager.io/cluster-issuer: cert-manager-global
 letsEncrypt: 
-  enabled: true
+  enabled: false
   email: Ckl7079@gmail.com
   ingress: 
-    class: nginx
+    class: rancher
 agentTLSMode: system-store
   
