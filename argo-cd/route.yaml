@@ -8,7 +8,7 @@ spec:
     - name: eg-default
       namespace: envoy-gateway
   hostnames:
-    - "argocd.ms.lightup.tw"
+    - "argo-cd.ms.lightup.tw"
   rules:
     - backendRefs:
         - group: ""

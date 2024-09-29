@@ -5,7 +5,7 @@
 global:
   # -- Default domain used by all components
   ## Used for ingresses, certificates, SSO, notifications, etc.
-  domain: argocd-dev.lightup.tw
+  domain: argocd.dev.lightup.tw
 
   # -- Common labels for the all resources
   additionalLabels: {}
