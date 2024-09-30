@@ -9,14 +9,15 @@ resource "helm_release" "argo-cd-helm" {
     file("${path.module}/values.yaml")
   ]
 
-  depends_on = [ "kubernetes_namespace.argo-cd-ns" ]
+  create_namespace = true
+
 }
 
-resource "kubernetes_namespace" "argo-cd-ns" {
-  metadata {
-    name = "argo-cd"
-  }
-}
+# resource "kubernetes_namespace" "argo-cd-ns" {
+#   metadata {
+#     name = "argo-cd"
+#   }
+# }
 
 resource "kubernetes_secret" "oidc_secret" {
   metadata {

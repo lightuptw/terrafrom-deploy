@@ -19,22 +19,22 @@
 # }
 
 
-# resource "kubectl_manifest" "rbac" {
-#   yaml_body = <<-EOF
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: argocd-rbac-cm
-#   namespace: argo-cd
-# data:
-#   policy.default: role:readonly
+resource "kubectl_manifest" "rbac" {
+  yaml_body = <<-EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argo-cd
+data:
+  policy.default: role:readonly
 
-#   policy.csv: |
-#     g, jack@lightup.tw, role:admin
+  policy.csv: |
+    g, jack@lightup.tw, role:admin
 
 
-#   scopes: '[groups, email]'
-#   EOF  
+  scopes: '[groups, email]'
+  EOF  
 
-# }
+}
 
