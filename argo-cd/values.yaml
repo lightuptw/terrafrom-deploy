@@ -5,7 +5,7 @@
 global:
   # -- Default domain used by all components
   ## Used for ingresses, certificates, SSO, notifications, etc.
-  domain: argo-cd.ms.lightup.tw
+  domain: argocd.ms.lightup.tw
 
   # -- Common labels for the all resources
   additionalLabels: {}
@@ -150,6 +150,13 @@ configs:
             requestedScopes: 
               - email
             adminEmail: jack@lightup.tw
+  rbac:
+    create: true
+    policy.csv: |
+        g, jack@lightup.tw, role:admin
+        g, yuhong@lightup.tw, role:admin
+    scopes: "[groups, email]"
+   
 
     # OIDC configuration as an alternative to dex (optional).
     # oidc.config: |

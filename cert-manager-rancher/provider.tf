@@ -1,9 +1,9 @@
 terraform {
 
-  backend "gcs" {
-    bucket = "tofu_state_lightup"
-    prefix  = "state/cert-manager-rancher"
-  }
+  # backend "gcs" {
+  #   bucket = "tofu_state_lightup"
+  #   prefix  = "state/cert-manager-rancher"
+  # }
 
   required_providers {
     kubernetes = {
@@ -17,11 +17,7 @@ terraform {
 }
 
 
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/config"
-  }
-}
+
 
 provider "kubernetes" {
   config_path = "~/.kube/config"
@@ -29,4 +25,10 @@ provider "kubernetes" {
 
 provider "kubectl" {
   config_path = "~/.kube/config"
+}
+
+provider "helm" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
 }

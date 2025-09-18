@@ -28,6 +28,8 @@ module "cert_manager" {
     }
   ]
 
+  chart_version = "v1.18.2"
+
   # additional_set = list(
   #   object({
   #     name  = "featureGates"
